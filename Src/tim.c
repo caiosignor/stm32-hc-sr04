@@ -1,8 +1,8 @@
-/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * File Name          : freertos.c
-  * Description        : Code for freertos applications
+  * File Name          : TIM.c
+  * Description        : This file provides code for the configuration
+  *                      of the TIM instances.
   ******************************************************************************
   * This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -46,110 +46,129 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "FreeRTOS.h"
-#include "task.h"
-#include "main.h"
-#include "cmsis_os.h"
+#include "tim.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-#include "gpio.h"
-#include "hcsr.h"
-/* USER CODE END Includes */
+/* USER CODE BEGIN 0 */
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
+/* USER CODE END 0 */
 
-/* USER CODE END PTD */
+TIM_HandleTypeDef htim2;
 
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN Variables */
-
-/* USER CODE END Variables */
-osThreadId defaultTaskHandle;
-
-/* Private function prototypes -----------------------------------------------*/
-/* USER CODE BEGIN FunctionPrototypes */
-
-/* USER CODE END FunctionPrototypes */
-
-void StartDefaultTask(void const *argument);
-
-void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
-
-/**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void)
+/* TIM2 init function */
+void MX_TIM2_Init(void)
 {
-	/* USER CODE BEGIN Init */
+	TIM_ClockConfigTypeDef sClockSourceConfig;
+	TIM_MasterConfigTypeDef sMasterConfig;
+	TIM_OC_InitTypeDef sConfigOC;
 
-	/* USER CODE END Init */
-
-	/* USER CODE BEGIN RTOS_MUTEX */
-	/* add mutexes, ... */
-	/* USER CODE END RTOS_MUTEX */
-
-	/* USER CODE BEGIN RTOS_SEMAPHORES */
-	/* add semaphores, ... */
-	/* USER CODE END RTOS_SEMAPHORES */
-
-	/* USER CODE BEGIN RTOS_TIMERS */
-	/* start timers, add new ones, ... */
-	/* USER CODE END RTOS_TIMERS */
-
-	/* Create the thread(s) */
-	/* definition and creation of defaultTask */
-	osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-	defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
-
-	/* USER CODE BEGIN RTOS_THREADS */
-	inicializar_tarefas();
-	/* USER CODE END RTOS_THREADS */
-
-	/* USER CODE BEGIN RTOS_QUEUES */
-	/* add queues, ... */
-	/* USER CODE END RTOS_QUEUES */
-}
-
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used 
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const *argument)
-{
-
-	/* USER CODE BEGIN StartDefaultTask */
-	/* Infinite loop */
-	for (;;)
+	htim2.Instance = TIM2;
+	htim2.Init.Prescaler = 1000 - 1;
+	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim2.Init.Period = 7200 - 1;
+	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+	if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
 	{
-		HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
-		osDelay(500);
+		_Error_Handler(__FILE__, __LINE__);
 	}
-	/* USER CODE END StartDefaultTask */
+
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+
+	if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_OC1REF;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+
+	sConfigOC.OCMode = TIM_OCMODE_PWM2;
+	sConfigOC.Pulse = 2;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		_Error_Handler(__FILE__, __LINE__);
+	}
+
+	HAL_TIM_MspPostInit(&htim2);
 }
 
-/* Private application code --------------------------------------------------*/
-/* USER CODE BEGIN Application */
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *tim_baseHandle)
+{
 
-/* USER CODE END Application */
+	if (tim_baseHandle->Instance == TIM2)
+	{
+		/* USER CODE BEGIN TIM2_MspInit 0 */
+
+		/* USER CODE END TIM2_MspInit 0 */
+		/* TIM2 clock enable */
+		__HAL_RCC_TIM2_CLK_ENABLE();
+		/* USER CODE BEGIN TIM2_MspInit 1 */
+
+		/* USER CODE END TIM2_MspInit 1 */
+	}
+}
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *timHandle)
+{
+
+	GPIO_InitTypeDef GPIO_InitStruct;
+	if (timHandle->Instance == TIM2)
+	{
+		/* USER CODE BEGIN TIM2_MspPostInit 0 */
+
+		/* USER CODE END TIM2_MspPostInit 0 */
+
+		/**TIM2 GPIO Configuration    
+    PA0-WKUP     ------> TIM2_CH1 
+    */
+		GPIO_InitStruct.Pin = GPIO_PIN_0;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+		/* USER CODE BEGIN TIM2_MspPostInit 1 */
+
+		/* USER CODE END TIM2_MspPostInit 1 */
+	}
+}
+
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef *tim_baseHandle)
+{
+
+	if (tim_baseHandle->Instance == TIM2)
+	{
+		/* USER CODE BEGIN TIM2_MspDeInit 0 */
+
+		/* USER CODE END TIM2_MspDeInit 0 */
+		/* Peripheral clock disable */
+		__HAL_RCC_TIM2_CLK_DISABLE();
+		/* USER CODE BEGIN TIM2_MspDeInit 1 */
+
+		/* USER CODE END TIM2_MspDeInit 1 */
+	}
+}
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

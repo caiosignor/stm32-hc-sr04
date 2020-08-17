@@ -1,8 +1,8 @@
-/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * File Name          : freertos.c
-  * Description        : Code for freertos applications
+  * File Name          : TIM.h
+  * Description        : This file provides code for the configuration
+  *                      of the TIM instances.
   ******************************************************************************
   * This notice applies to any and all portions of this file
   * that are not between comment pairs USER CODE BEGIN and
@@ -46,110 +46,49 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __tim_H
+#define __tim_H
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "FreeRTOS.h"
-#include "task.h"
+#include "stm32f1xx_hal.h"
 #include "main.h"
-#include "cmsis_os.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-#include "gpio.h"
-#include "hcsr.h"
-/* USER CODE END Includes */
+	/* USER CODE BEGIN Includes */
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
+	/* USER CODE END Includes */
 
-/* USER CODE END PTD */
+	extern TIM_HandleTypeDef htim2;
 
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
+	/* USER CODE BEGIN Private defines */
 
-/* USER CODE END PD */
+	/* USER CODE END Private defines */
 
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
+	extern void _Error_Handler(char *, int);
 
-/* USER CODE END PM */
+	void MX_TIM2_Init(void);
 
-/* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN Variables */
+	void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
-/* USER CODE END Variables */
-osThreadId defaultTaskHandle;
+	/* USER CODE BEGIN Prototypes */
 
-/* Private function prototypes -----------------------------------------------*/
-/* USER CODE BEGIN FunctionPrototypes */
+	/* USER CODE END Prototypes */
 
-/* USER CODE END FunctionPrototypes */
-
-void StartDefaultTask(void const *argument);
-
-void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+#ifdef __cplusplus
+}
+#endif
+#endif /*__ tim_H */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
+  * @}
   */
-void MX_FREERTOS_Init(void)
-{
-	/* USER CODE BEGIN Init */
 
-	/* USER CODE END Init */
-
-	/* USER CODE BEGIN RTOS_MUTEX */
-	/* add mutexes, ... */
-	/* USER CODE END RTOS_MUTEX */
-
-	/* USER CODE BEGIN RTOS_SEMAPHORES */
-	/* add semaphores, ... */
-	/* USER CODE END RTOS_SEMAPHORES */
-
-	/* USER CODE BEGIN RTOS_TIMERS */
-	/* start timers, add new ones, ... */
-	/* USER CODE END RTOS_TIMERS */
-
-	/* Create the thread(s) */
-	/* definition and creation of defaultTask */
-	osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-	defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
-
-	/* USER CODE BEGIN RTOS_THREADS */
-	inicializar_tarefas();
-	/* USER CODE END RTOS_THREADS */
-
-	/* USER CODE BEGIN RTOS_QUEUES */
-	/* add queues, ... */
-	/* USER CODE END RTOS_QUEUES */
-}
-
-/* USER CODE BEGIN Header_StartDefaultTask */
 /**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used 
-  * @retval None
+  * @}
   */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const *argument)
-{
-
-	/* USER CODE BEGIN StartDefaultTask */
-	/* Infinite loop */
-	for (;;)
-	{
-		HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
-		osDelay(500);
-	}
-	/* USER CODE END StartDefaultTask */
-}
-
-/* Private application code --------------------------------------------------*/
-/* USER CODE BEGIN Application */
-
-/* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
