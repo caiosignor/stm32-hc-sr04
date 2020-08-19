@@ -61,6 +61,16 @@
 
 #define Led_Pin GPIO_PIN_13
 #define Led_GPIO_Port GPIOC
+#define TRIGGER_Pin GPIO_PIN_0
+#define TRIGGER_GPIO_Port GPIOA
+#define IC_Interrupt_Pin GPIO_PIN_1
+#define IC_Interrupt_GPIO_Port GPIOA
+#define ECHO_RISING_Pin GPIO_PIN_3
+#define ECHO_RISING_GPIO_Port GPIOA
+#define ECHO_RISING_EXTI_IRQn EXTI3_IRQn
+#define ECHO_FALLING_Pin GPIO_PIN_4
+#define ECHO_FALLING_GPIO_Port GPIOA
+#define ECHO_FALLING_EXTI_IRQn EXTI4_IRQn
 
 /* ########################## Assert Selection ############################## */
 /**
